@@ -50,7 +50,7 @@ def parse(base_url, headers):
                     'price': price,
                     'address': address,
                     'href': href
-                    # 'company': company,
+                    'company': company,
                     # 'city': city,
                     # 'salary': salary,
                     # 'content': content,
