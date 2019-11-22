@@ -36,12 +36,12 @@ def parse(base_url, headers):
         for url in urls:
             request = session.get(url, headers=headers)
             soup = bs(request.content, 'lxml')
-            divs = soup.find_all('div', attrs={'itemtype': 'http://schema.org/Product'})
+            divs = soup.find_all('div', attrs={'class': 'item_table'})
             for div in divs:
                 date = sub(div.find('div', attrs={'data-marker': 'item-date'}).text)
-                title = div.find('a', attrs={'class': 'item-description-title-link'}).text
-                price = div.find('span', attrs={'data-marker': 'item-price'})['content']
-                address = sub(div.find('p', attrs={'data-marker': 'item-address'}).text)
+                title = div.find('span', attrs={'itemprop': 'name'}).text
+                price = div.find('span', attrs={'class': 'price price_highlight'})
+                address = div.find('span', attrs={'class': 'item-address__string'}).text
                 href = 'https://www.avito.ru' + div.find('a', attrs={'class': 'item-description-title-link'})['href']
 
                 apartments.append({
@@ -50,7 +50,7 @@ def parse(base_url, headers):
                     'price': price,
                     'address': address,
                     'href': href
-                    'company': company,
+                    #'company': company,
                     # 'city': city,
                     # 'salary': salary,
                     # 'content': content,
@@ -59,7 +59,7 @@ def parse(base_url, headers):
         finish = time.time()
 
         print('Спарсено ' + str(len(apartments)) + ' позиции за ' + str(finish - start))
-        # print(apartments)
+        #print(apartments)
         # a_pen = open('index.html', 'w')
         # a_pen.write(str(soup))
         # a_pen.close()
