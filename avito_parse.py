@@ -34,13 +34,12 @@ def parse(base_url, headers):
                     urls.append(url)
         except:
             pass
-        print(urls)
         for url in urls:
             request = session.get(url, headers=headers)
             soup = bs(request.content, 'lxml')
             divs = soup.find_all('div', attrs={'class': 'item_table'})
             for div in divs:
-                date = sub(div.find('div', attrs={'data-marker': 'item-date'}).text)
+                date =  div.find('div', attrs={'class': 'js-item-date'})['data-absolute-date']
                 title = div.find('span', attrs={'itemprop': 'name'}).text
                 price = div.find('span', attrs={'class': 'price price_highlight'})
                 address = div.find('span', attrs={'class': 'item-address__string'}).text
