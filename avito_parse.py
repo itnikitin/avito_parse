@@ -1,6 +1,7 @@
 import re
 import time
 import csv
+import MySQLdb
 
 import requests
 from bs4 import BeautifulSoup as bs
@@ -33,6 +34,7 @@ def parse(base_url, headers):
                     urls.append(url)
         except:
             pass
+        print(urls)
         for url in urls:
             request = session.get(url, headers=headers)
             soup = bs(request.content, 'lxml')
