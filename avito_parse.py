@@ -40,8 +40,8 @@ def parse(base_url, headers):
             divs = soup.find_all('div', attrs={'class': 'item_table'})
             for div in divs:
                 date =  div.find('div', attrs={'class': 'js-item-date'})['data-absolute-date']
-                title = div.find('span', attrs={'itemprop': 'name'}).text
-                price = div.find('span', attrs={'class': 'price price_highlight'})
+                title = sub(div.find('span', attrs={'itemprop': 'name'}).text)
+                price = div.find('span', attrs={'itemprop': 'price'}).text
                 address = div.find('span', attrs={'class': 'item-address__string'}).text
                 href = 'https://www.avito.ru' + div.find('a', attrs={'class': 'item-description-title-link'})['href']
 
@@ -57,6 +57,7 @@ def parse(base_url, headers):
                     # 'content': content,
                     # 'href': href
                 })
+                #print(apartments)
         finish = time.time()
 
         print('Спарсено ' + str(len(apartments)) + ' позиции за ' + str(finish - start))
