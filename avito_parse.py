@@ -68,7 +68,7 @@ def parse(base_url, headers):
     return apartments
 
 def writer_csv(apartments):
-    with open('parse_avito.csv', 'w') as file:
+    with open('parse_avito.csv', 'w', encoding='utf8') as file:
         a_pen = csv.writer(file)
         a_pen.writerow(('Дата', 'Название объявления', 'Цена', 'Адрес', 'Ссылка'))
         for apartment in apartments:
