@@ -39,6 +39,7 @@ def parse(base_url, headers):
             soup = bs(request.content, 'lxml')
             divs = soup.find_all('div', attrs={'class': 'item_table'})
             for div in divs:
+                item_id =  div.find('button', attrs={'class': 'js-item-extended-contacts'})['data-item-id']
                 date =  div.find('div', attrs={'class': 'js-item-date'})['data-absolute-date']
                 title = sub(div.find('span', attrs={'itemprop': 'name'}).text)
                 price = div.find('span', attrs={'itemprop': 'price'}).text
@@ -46,6 +47,7 @@ def parse(base_url, headers):
                 href = 'https://www.avito.ru' + div.find('a', attrs={'class': 'item-description-title-link'})['href']
 
                 apartments.append({
+                    'item_id': item_id,
                     'date': date,
                     'title': title,
                     'price': price,
@@ -72,9 +74,10 @@ def parse(base_url, headers):
 def writer_csv(apartments):
     with open('parse_avito.csv', 'w', encoding='utf8') as file:
         a_pen = csv.writer(file)
-        a_pen.writerow(('Дата', 'Название объявления', 'Цена', 'Адрес', 'Ссылка'))
+        a_pen.writerow(('item_id', 'Дата', 'Название объявления', 'Цена', 'Адрес', 'Ссылка'))
         for apartment in apartments:
-            a_pen.writerow((apartment['date'], apartment['title'], apartment['price'], apartment['address'], apartment['href']))
+            a_pen.writerow((apartment['item_id'], apartment['date'], apartment['title'], apartment['price'], apartment['address'], apartment['href']))
+            #print(apartment)
 
 apartments = parse(base_url,headers)
 writer_csv(apartments)
