@@ -23,8 +23,6 @@ passwd = config['db']['pass']
 db = config['db']['db']
 table = config['db']['table']
 
-print(host, user, passwd, db, table)
-
 headers = {'accept': '*/*',
             'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36'}
 
@@ -118,8 +116,8 @@ def add_item(apartments):
                 address = apartment['address']
                 link = apartment['href']
                 # Create a new record
-                sql = "INSERT INTO %s (`item_id`, `date`, `name`, `price`, `address`, `link`) VALUES (%s, %s, %s, %s, %s, %s)"
-                cursor.execute(sql, (table, item_id, date, name, price, address, link))
+                sql = "INSERT INTO "+ table + "(`item_id`, `date`, `name`, `price`, `address`, `link`) VALUES (%s, %s, %s, %s, %s, %s)"
+                cursor.execute(sql, (item_id, date, name, price, address, link))
             connection.commit()
 
     # with connection.cursor() as cursor:
