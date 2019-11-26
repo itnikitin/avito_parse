@@ -1,11 +1,12 @@
-# -*- coding: utf-8 -*-
+
 import re
 import time
 import csv
-import MySQLdb
+import pymysql.cursors
 import requests
 from bs4 import BeautifulSoup as bs
 import yaml
+import datetime
 
 def load_config(config_file):
     with open(config_file, 'r') as stream:
@@ -15,6 +16,14 @@ def load_config(config_file):
             print(exc)
 
 config = load_config('config.yml')
+
+host = config['db']['host']
+user = config['db']['user']
+passwd = config['db']['pass']
+db = config['db']['db']
+table = config['db']['table']
+
+print(host, user, passwd, db, table)
 
 headers = {'accept': '*/*',
             'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36'}
@@ -89,5 +98,39 @@ def writer_csv(apartments):
             a_pen.writerow((apartment['item_id'], apartment['date'], apartment['title'], apartment['price'], apartment['address'], apartment['href']))
             #print(apartment)
 
+def add_item(apartments):
+    connection = pymysql.connect(
+    host=host,
+    user=user,
+    password=passwd,
+    db=db,
+    charset='utf8mb4',
+    cursorclass=pymysql.cursors.DictCursor
+    )
+
+    try:
+         with connection.cursor() as cursor:
+            for apartment in apartments:
+                item_id = int(apartment['item_id'])
+                date = datetime.datetime.today()
+                name = apartment['title']
+                price = int(re.sub('\D+','',  apartment['price']))
+                address = apartment['address']
+                link = apartment['href']
+                # Create a new record
+                sql = "INSERT INTO %s (`item_id`, `date`, `name`, `price`, `address`, `link`) VALUES (%s, %s, %s, %s, %s, %s)"
+                cursor.execute(sql, (table, item_id, date, name, price, address, link))
+            connection.commit()
+
+    # with connection.cursor() as cursor:
+    #     # Read a single record
+    #     sql = "SELECT `item_id`, `date` FROM `one_room` WHERE `link`=%s"
+    #     cursor.execute(sql, ('link',))
+    #     result = cursor.fetchone()
+    #     print(result)
+    finally:
+        connection.close()
+
 apartments = parse(base_url,headers)
-writer_csv(apartments)
+#writer_csv(apartments)
+add_item(apartments)
