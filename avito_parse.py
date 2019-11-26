@@ -1,10 +1,20 @@
+# -*- coding: utf-8 -*-
 import re
 import time
 import csv
 import MySQLdb
-
 import requests
 from bs4 import BeautifulSoup as bs
+import yaml
+
+def load_config(config_file):
+    with open(config_file, 'r') as stream:
+        try:
+            return yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+
+config = load_config('config.yml')
 
 headers = {'accept': '*/*',
             'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36'}

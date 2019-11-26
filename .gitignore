@@ -103,3 +103,4 @@ venv.bak/
 # mypy
 .mypy_cache/
 parse_avito.csv
+config.yml
