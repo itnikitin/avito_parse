@@ -2,7 +2,7 @@
 import re
 import time
 import csv
-import pymysql.cursors
+import pymysql
 import requests
 from bs4 import BeautifulSoup as bs
 import yaml
@@ -26,7 +26,7 @@ table = config['db']['table']
 headers = {'accept': '*/*',
             'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36'}
 
-base_url = 'https://www.avito.ru/neryungri/kvartiry/prodam/1-komnatnye?p=1&cd=1&f=59_0b0.496_0b0.497_0b0'
+base_url = 'https://www.avito.ru/neryungri/kvartiry/prodam?p=1&cd=1&f=549_5696-5697'
 
 def sub(str):
     str = re.sub(r'\n|\s+', ' ', str).strip()
@@ -45,8 +45,8 @@ def parse(base_url, headers):
             pagination = soup.find_all('a', attrs={'class': 'pagination-page'})
             count = int(pagination[-2].text)
             for i in range(count):
-                url = f'https://www.avito.ru/neryungri/kvartiry/prodam/1-komnatnye?p={i+1}&cd=1&f=59_0b0.496_0b0.497_0b0'
-
+                url = f'https://www.avito.ru/neryungri/kvartiry/prodam?p={i+1}&cd=1&f=549_5696-5697'
+                
                 if url not in urls:
                     urls.append(url)
         except:
@@ -106,6 +106,9 @@ def add_item(apartments):
     cursorclass=pymysql.cursors.DictCursor
     )
 
+    sql_search = "SELECT item_id FROM " + table + " WHERE item_id = %s"
+    sql_add = "INSERT INTO "+ table + "(`item_id`, `date`, `name`, `price`, `address`, `link`) VALUES (%s, %s, %s, %s, %s, %s)"
+
     try:
          with connection.cursor() as cursor:
             for apartment in apartments:
@@ -115,9 +118,17 @@ def add_item(apartments):
                 price = int(re.sub('\D+','',  apartment['price']))
                 address = apartment['address']
                 link = apartment['href']
+                cursor.execute(sql_search, (item_id, ))
+                # gets the number of rows affected by the command executed
+                rows=cursor.rowcount
+                if rows == 0:
+                    cursor.execute(sql_add, (item_id, date, name, price, address, link))
+                    print ("Новое объявление ---> ",  item_id, date, name, price, address)
+                else:
+                    print ("Есть запись")
+
                 # Create a new record
-                sql = "INSERT INTO "+ table + "(`item_id`, `date`, `name`, `price`, `address`, `link`) VALUES (%s, %s, %s, %s, %s, %s)"
-                cursor.execute(sql, (item_id, date, name, price, address, link))
+                #cursor.execute(sql_add, (item_id, date, name, price, address, link))
             connection.commit()
 
     # with connection.cursor() as cursor:
@@ -127,6 +138,7 @@ def add_item(apartments):
     #     result = cursor.fetchone()
     #     print(result)
     finally:
+        cursor.close()
         connection.close()
 
 apartments = parse(base_url,headers)
