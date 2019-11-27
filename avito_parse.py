@@ -1,4 +1,4 @@
-
+import telebot
 import re
 import time
 import csv
@@ -22,6 +22,10 @@ user = config['db']['user']
 passwd = config['db']['pass']
 db = config['db']['db']
 table = config['db']['table']
+api_token = config['telegram']['token']
+chatid = (config['telegram']['chatid'])
+bot = telebot.TeleBot('token')
+bot.send_message(chatid, 'text')
 
 headers = {'accept': '*/*',
             'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36'}
