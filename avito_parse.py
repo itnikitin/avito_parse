@@ -42,6 +42,9 @@ headers = {'accept': '*/*',
 
 base_url = 'https://www.avito.ru/neryungri/kvartiry/prodam?p=1&cd=1&f=549_5696-5697'
 
+base_url_y = 'https://youla.ru/neryungri/nedvijimost/prodaja-kvartiri?attributes[komnat_v_kvartire][0]=10654&attributes[komnat_v_kvartire][1]=10655&attributes[term_of_placement][from]=-1%%20day&attributes[term_of_placement][to]=now'
+
+
 def sub(str):
     str = re.sub(r'\n|\s+', ' ', str).strip()
     return (str)
@@ -102,6 +105,44 @@ def parse(base_url, headers):
         print('ERROR')
     return apartments
 
+def parse_y(base_url_y, headers):
+    apartments_y = []
+    urls_y = []
+    urls_y.append(base_url_y)
+    session_y = requests.session()
+    request_y = session_y.get(base_url_y, headers=headers)
+    soup_y = bs(request_y.content, 'lxml')
+    if request_y.status_code == 200:
+        start = time.time()
+        divs_y = soup_y.find_all('li', attrs={'class': 'product_item'})
+        print(divs_y)
+        for div in divs_y:
+            #print(div)
+            #item_id =  div.find('li', attrs={'class': 'product_item'})['data-id']
+            date =  div.find('span', attrs={'class': 'visible-xs'}).text
+            title = sub(div.find('div', attrs={'class': 'product_item__title'}).text)
+            price = div.find('div', attrs={'class': 'product_item__description'}).text
+            address = ''
+            href = 'https://youla.ru' + div.find('a')['href']
+
+            apartments_y.append({
+                #'item_id': item_id,
+                'date': date,
+                'title': title,
+                'price': price,
+                'address': address,
+                'href': href
+            })
+           # print(apartments_y)
+        finish = time.time()
+
+        print('Спарсено ' + str(len(apartments_y)) + ' позиции за ' + str(finish - start))
+        
+    else:
+        print('ERROR')
+    return apartments_y
+
+
 def writer_csv(apartments):
     with open('parse_avito.csv', 'w', encoding='utf8') as file:
         a_pen = csv.writer(file)
@@ -137,6 +178,7 @@ def add_item(apartments):
                 rows=cursor.rowcount
                 if rows == 0:
                     cursor.execute(sql_add, (item_id, date, name, price, address, link))
+                    
                     print ("Новое объявление ---> ",  item_id, date, name, price, address)
                     text = name + str(price) + address + link
                     send_message(text, chatid)
@@ -157,6 +199,7 @@ def add_item(apartments):
         cursor.close()
         connection.close()
 
-apartments = parse(base_url,headers)
+#apartments = parse(base_url,headers)
 #writer_csv(apartments)
-add_item(apartments)
+#add_item(apartments)
+apartments_y = parse_y(base_url_y,headers)
