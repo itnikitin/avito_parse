@@ -1,9 +1,9 @@
-import telebot
 import re
 import time
 import csv
 import pymysql
 import requests
+import json
 from bs4 import BeautifulSoup as bs
 import yaml
 import datetime
@@ -22,10 +22,20 @@ user = config['db']['user']
 passwd = config['db']['pass']
 db = config['db']['db']
 table = config['db']['table']
-api_token = config['telegram']['token']
+TOKEN = config['telegram']['token']
+URL = "https://api.telegram.org/bot{}/".format(TOKEN)
 chatid = (config['telegram']['chatid'])
-bot = telebot.TeleBot('token')
-bot.send_message(chatid, 'text')
+
+def get_url(url):
+    response = requests.get(url)
+    content = response.content.decode("utf8")
+    return content
+    
+
+def send_message(text, chat_id):
+    url = URL + "sendMessage?text={}&chat_id={}".format(text, chat_id)
+    get_url(url)
+    print(url)
 
 headers = {'accept': '*/*',
             'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36'}
@@ -128,6 +138,8 @@ def add_item(apartments):
                 if rows == 0:
                     cursor.execute(sql_add, (item_id, date, name, price, address, link))
                     print ("Новое объявление ---> ",  item_id, date, name, price, address)
+                    text = name + str(price) + address + link
+                    send_message(text, chatid)
                 else:
                     print ("Есть запись")
 
